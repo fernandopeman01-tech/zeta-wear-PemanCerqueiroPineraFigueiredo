@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zeta Wear · Dashboard Escaparate ABC×XYZ</title>
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --card-bg: #ffffff;
+      --text-color: #212529;
+      --border-color: #dee2e6;
+      --primary-color: #0f172a;
+      --accent-color: #2563eb;
+      --warning-bg: #fef2f2;
+      --warning-border: #fca5a5;
+      --warning-text: #991b1b;
+      --cell-hover: #e2e8f0;
+      --cell-selected: #cbd5e1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.5;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 24px;
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      color: var(--primary-color);
+      margin-bottom: 4px;
+    }
+
+    p.subtitle {
+      color: #64748b;
+      font-size: 0.95rem;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    @media (min-width: 850px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .card h2 {
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+      color: var(--primary-color);
+    }
+
+    /* Warning Panel */
+    .warning-panel {
+      background-color: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+      color: var(--warning-text);
+    }
+
+    .warning-panel h3 {
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .warning-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .badge-warning {
+      background-color: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #f87171;
+    }
+
+    /* Matrix Table */
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+    }
+
+    .matrix-table th, .matrix-table td {
+      border: 1px solid var(--border-color);
+      padding: 12px;
+    }
+
+    .matrix-table th {
+      background-color: #f1f5f9;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .matrix-cell {
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .matrix-cell:hover {
+      background-color: var(--cell-hover);
+    }
+
+    .matrix-cell.selected {
+      background-color: var(--cell-selected);
+      font-weight: bold;
+    }
+
+    .cell-label {
+      font-size: 0.75rem;
+      color: #64748b;
+      display: block;
+    }
+
+    .cell-count {
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    /* Details Table */
+    .details-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 0.9rem;
+    }
+
+    .details-table th, .details-table td {
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      text-align: left;
+    }
+
+    .details-table th {
+      background-color: #f1f5f9;
+    }
+
+    .empty-state {
+      color: #64748b;
+      font-style: italic;
+      padding: 12px 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Zeta Wear · Escaparate de Catálogo</h1>
+    <p class="subtitle">Análisis de Matriz ABC (Margen) × XYZ (Variabilidad Mensual)</p>
+  </header>
+
+  <div id="warning-container" class="warning-panel">
+    <h3>⚠️ Atención Requerida: Referencias Críticas (Celdas AZ y AY)</h3>
+    <div id="warning-list" class="warning-list">Cargando datos...</div>
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="card">
+      <h2>Matriz ABC × XYZ (Recuento de SKU)</h2>
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th>ABC \ XYZ</th>
+            <th>X (cv ≤ 0.25)</th>
+            <th>Y (0.25 < cv ≤ 0.5)</th>
+            <th>Z (cv > 0.5)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>A (Alta)</th>
+            <td class="matrix-cell" data-cell="AX"><span class="cell-label">AX</span><span class="cell-count" id="count-AX">0</span></td>
+            <td class="matrix-cell" data-cell="AY"><span class="cell-label">AY</span><span class="cell-count" id="count-AY">0</span></td>
+            <td class="matrix-cell" data-cell="AZ"><span class="cell-label">AZ</span><span class="cell-count" id="count-AZ">0</span></td>
+          </tr>
+          <tr>
+            <th>B (Media)</th>
+            <td class="matrix-cell" data-cell="BX"><span class="cell-label">BX</span><span class="cell-count" id="count-BX">0</span></td>
+            <td class="matrix-cell" data-cell="BY"><span class="cell-label">BY</span><span class="cell-count" id="count-BY">0</span></td>
+            <td class="matrix-cell" data-cell="BZ"><span class="cell-label">BZ</span><span class="cell-count" id="count-BZ">0</span></td>
+          </tr>
+          <tr>
+            <th>C (Baja)</th>
+            <td class="matrix-cell" data-cell="CX"><span class="cell-label">CX</span><span class="cell-count" id="count-CX">0</span></td>
+            <td class="matrix-cell" data-cell="CY"><span class="cell-label">CY</span><span class="cell-count" id="count-CY">0</span></td>
+            <td class="matrix-cell" data-cell="CZ"><span class="cell-label">CZ</span><span class="cell-count" id="count-CZ">0</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2 id="details-title">Referencias de la Celda Seleccionada</h2>
+      <div id="details-container">
+        <p class="empty-state">Haz clic en una celda de la matriz para ver sus referencias.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let catalogData = [];
+
+    function parseCSV(csvText) {
+      const lines = csvText.trim().split(/\r?\n/);
+      if (lines.length < 2) return [];
+      const headers = lines[0].split(',').map(h => h.trim());
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        const values = lines[i].split(',').map(v => v.trim());
+        const row = {};
+        headers.forEach((h, index) => {
+          row[h] = values[index];
+        });
+        rows.push(row);
+      }
+      return rows;
+    }
+
+    async function initDashboard() {
+      try {
+        const response = await fetch('resultados/clasificacion.csv');
+        if (!response.ok) {
+          throw new Error('Error al cargar clasificacion.csv: ' + response.statusText);
+        }
+        const text = await response.text();
+        catalogData = parseCSV(text);
+
+        renderMatrix();
+        renderWarningPanel();
+        setupCellClickHandlers();
+      } catch (err) {
+        console.error(err);
+        document.getElementById('warning-list').innerHTML = `<span style="color:red">Error cargando datos: ${err.message}</span>`;
+      }
+    }
+
+    function renderMatrix() {
+      const counts = {
+        AX: 0, AY: 0, AZ: 0,
+        BX: 0, BY: 0, BZ: 0,
+        CX: 0, CY: 0, CZ: 0
+      };
+
+      catalogData.forEach(item => {
+        if (counts[item.celda] !== undefined) {
+          counts[item.celda]++;
+        }
+      });
+
+      Object.keys(counts).forEach(cell => {
+        const el = document.getElementById(`count-${cell}`);
+        if (el) el.textContent = counts[cell];
+      });
+    }
+
+    function renderWarningPanel() {
+      const warningItems = catalogData.filter(item => item.celda === 'AZ' || item.celda === 'AY');
+      const container = document.getElementById('warning-list');
+      if (warningItems.length === 0) {
+        container.innerHTML = '<em>No hay referencias críticas en AZ o AY.</em>';
+        return;
+      }
+
+      container.innerHTML = warningItems.map(item =>
+        `<span class="badge badge-warning">${item.sku} (${item.celda}) — CV: ${parseFloat(item.cv).toFixed(2)}</span>`
+      ).join('');
+    }
+
+    function setupCellClickHandlers() {
+      const cells = document.querySelectorAll('.matrix-cell');
+      cells.forEach(cell => {
+        cell.addEventListener('click', () => {
+          cells.forEach(c => c.classList.remove('selected'));
+          cell.classList.add('selected');
+          const cellCode = cell.getAttribute('data-cell');
+          showCellDetails(cellCode);
+        });
+      });
+    }
+
+    function showCellDetails(cellCode) {
+      const title = document.getElementById('details-title');
+      const container = document.getElementById('details-container');
+      title.textContent = `Referencias de la Celda ${cellCode}`;
+
+      const filtered = catalogData.filter(item => item.celda === cellCode);
+      if (filtered.length === 0) {
+        container.innerHTML = `<p class="empty-state">No hay ninguna referencia en la celda ${cellCode}.</p>`;
+        return;
+      }
+
+      let html = `
+        <table class="details-table">
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Clase ABC</th>
+              <th>CV</th>
+              <th>Clase XYZ</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      filtered.forEach(item => {
+        html += `
+          <tr>
+            <td><strong>${item.sku}</strong></td>
+            <td>${item.clase_abc}</td>
+            <td>${parseFloat(item.cv).toFixed(4)}</td>
+            <td>${item.clase_xyz}</td>
+          </tr>
+        `;
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    document.addEventListener('DOMContentLoaded', initDashboard);
+  </script>
+</body>
+</html>

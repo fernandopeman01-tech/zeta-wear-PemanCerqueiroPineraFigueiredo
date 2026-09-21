@@ -42,7 +42,7 @@ def calculate_abc():
 
     fieldnames = ["sku", "margen_anual", "pct_acumulado", "clase_abc"]
     with open(output_file, mode="w", encoding="utf-8", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer = csv.DictWriter(f, fieldnames=fieldnames, lineterminator="\r\n")
         writer.writeheader()
         for item in items:
             writer.writerow({
